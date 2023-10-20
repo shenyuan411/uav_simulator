@@ -7,18 +7,24 @@
 #include <iostream>
 #include <random>
 
-#include "quadrotor_msgs/PositionCommand.h"
+// #include "quadrotor_msgs/PositionCommand.h"
+#include "mavros_msgs/PositionTarget.h"
 
 ros::Subscriber _cmd_sub;
 ros::Publisher  _odom_pub;
 ros::Publisher  _pose_pub;
 
-quadrotor_msgs::PositionCommand _cmd;
+// quadrotor_msgs::PositionCommand _cmd;
+mavros_msgs::PositionTarget _cmd;
 double                          _init_x, _init_y, _init_z;
 double                          _init_qx, _init_qy, _init_qz, _init_qw;
 
 bool rcv_cmd = false;
-void rcvPosCmdCallBack(const quadrotor_msgs::PositionCommand cmd) {
+// void rcvPosCmdCallBack(const quadrotor_msgs::PositionCommand cmd) {
+//   rcv_cmd = true;
+//   _cmd    = cmd;
+// }
+void rcvPosCmdCallBack(const mavros_msgs::PositionTarget cmd) {
   rcv_cmd = true;
   _cmd    = cmd;
 }
@@ -40,7 +46,7 @@ void pubOdom() {
     odom.pose.pose.position.z = _cmd.position.z;
 
     Eigen::Vector3d alpha =
-        Eigen::Vector3d(_cmd.acceleration.x, _cmd.acceleration.y, _cmd.acceleration.z) +
+        Eigen::Vector3d(_cmd.acceleration_or_force.x, _cmd.acceleration_or_force.y, _cmd.acceleration_or_force.z) +
         9.8 * Eigen::Vector3d(0, 0, 1);
     Eigen::Vector3d xC(cos(_cmd.yaw), sin(_cmd.yaw), 0);
     Eigen::Vector3d yC(-sin(_cmd.yaw), cos(_cmd.yaw), 0);
@@ -61,9 +67,9 @@ void pubOdom() {
     odom.twist.twist.linear.y = _cmd.velocity.y;
     odom.twist.twist.linear.z = _cmd.velocity.z;
 
-    odom.twist.twist.angular.x = _cmd.acceleration.x;
-    odom.twist.twist.angular.y = _cmd.acceleration.y;
-    odom.twist.twist.angular.z = _cmd.acceleration.z;
+    odom.twist.twist.angular.x = _cmd.acceleration_or_force.x;
+    odom.twist.twist.angular.y = _cmd.acceleration_or_force.y;
+    odom.twist.twist.angular.z = _cmd.acceleration_or_force.z;
 
     /* update pose */
     pose.pose.position.x    = _cmd.position.x;
